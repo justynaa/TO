@@ -1,0 +1,668 @@
+
+/*
+ * To change this license header, choose License Headers in Project Properties.
+ * To change this template file, choose Tools | Templates
+ * and open the template in the editor.
+ */
+package to_projekt_v2;
+
+import java.sql.*;
+import java.util.*;
+import java.util.logging.Level;
+import java.util.logging.Logger;
+import javax.swing.JOptionPane;
+import javax.swing.table.DefaultTableModel;
+import javax.swing.table.TableModel;
+import javax.swing.JFrame;
+import javax.swing.JTable;
+import javax.swing.JScrollPane;
+import java.awt.BorderLayout;
+/**
+ *
+ * @author Justyna
+ */
+public class MechanicOrdersManager extends JFrame {
+    String userName = "";
+    String userType = "";
+    User user; //zmienna na zapisanie id
+    Connection connection = null;
+    //PreparedStatement ptmt = null; //chyba do usuniecia
+    ResultSet resultSet = null;
+    
+    String savedID;
+    /**
+     * Creates new form InsertUpdateDeleteClient
+     */
+    public MechanicOrdersManager() throws SQLException {
+        initComponents();
+        showOrdersInJTable();
+    }
+    public MechanicOrdersManager(String userName, String userType) throws SQLException {
+        initComponents();
+        this.userName = userName;
+        this.userType = userType;
+        getUser(this.userName);
+        jLabelUserName.setText(userName);   //zmienna zalogowanego
+        showOrdersInJTable();
+    }
+
+    private Connection getConnection() throws SQLException {
+	Connection conn;
+	conn = ConnectionFactory.getInstance().getConnection();
+	return conn;
+    }
+    public void getUser (String userName) throws SQLException{
+        Connection connection = getConnection();
+        String query = "SELECT * FROM Uzytkownik WHERE Login='" + this.userName +"'";
+        Statement st;
+        ResultSet rs;
+        
+        try{
+            st = connection.createStatement();
+            rs = st.executeQuery(query);
+           while(rs.next()){
+                user = new User(rs.getInt("IDUzytkownik"), rs.getString("Nazwisko"), rs.getString("Imie"), rs.getString("Login"), rs.getString("Haslo"), rs.getString("Typ"));
+           
+           }
+        }catch(Exception e){
+               e.printStackTrace();
+        }
+    }
+
+    public ArrayList<Order> getOrdersList () throws SQLException{
+        ArrayList<Order> ordersList = new ArrayList<Order>();
+        Connection connection = getConnection();
+        
+        String query = "SELECT * FROM Zamowienie WHERE Mechanik=" + user.getID();
+        Statement st;
+        ResultSet rs;
+        
+        try{
+            st = connection.createStatement();
+            rs = st.executeQuery(query);
+            Order order;
+            while(rs.next()){
+                order = new Order(rs.getInt("IDZamowienie"), rs.getString("RozpoczecieRealizacji"), rs.getString("ZakonczenieRealizacji"), rs.getString("Opis"), rs.getInt("Mechanik"), rs.getInt("Samochod"), rs.getDouble("KosztRealizacji"));
+                ordersList.add(order);
+            }
+        }catch(Exception e){
+               e.printStackTrace();
+        }
+        return ordersList;
+    }
+    
+    //Wyswietlenie w JTable
+    public void showOrdersInJTable() throws SQLException{
+        ArrayList<Order> ordersList = getOrdersList();
+        DefaultTableModel model = (DefaultTableModel)jTableDisplayOrders.getModel();
+        Object[] row = new Object[7];       //6 kolumn
+        for(int i=0; i < ordersList.size(); i++){
+                   
+            row[0] = ordersList.get(i).getID();
+            row[1] = ordersList.get(i).getStartDate();
+            row[2] = ordersList.get(i).getEndDate();
+            row[3] = ordersList.get(i).getDescription();
+            row[4] = ordersList.get(i).getMechanic();
+            row[5] = ordersList.get(i).getCar();
+            row[6] = ordersList.get(i).getCost();
+            model.addRow(row);
+        }
+        
+    }    
+    //Execute SQL Query
+    public void executeSQLQuery(String query, String message) throws SQLException{
+        Connection con = getConnection();
+        Statement st;
+        try{
+            st = con.createStatement();
+            if(st.executeUpdate(query)== 1){
+                //odswiezenie danych widocznych w JTable
+                DefaultTableModel model = (DefaultTableModel)jTableDisplayOrders.getModel();
+                model.setRowCount(0);
+                showOrdersInJTable();
+                
+                JOptionPane.showMessageDialog(null, "Realizacja zamówenia " + message + ".");
+            }
+            else{
+                JOptionPane.showMessageDialog(null, "Realizacja zamówenia nie " + message + ". Sprawdź poprawnośc danych.");
+            }  
+        }catch(Exception e){
+               e.printStackTrace();
+        }
+    }
+    
+    
+    /**
+     * This method is called from within the constructor to initialize the form.
+     * WARNING: Do NOT modify this code. The content of this method is always
+     * regenerated by the Form Editor.
+     */
+    @SuppressWarnings("unchecked")
+    // <editor-fold defaultstate="collapsed" desc="Generated Code">//GEN-BEGIN:initComponents
+    private void initComponents() {
+
+        jPanel1 = new javax.swing.JPanel();
+        jLabel1 = new javax.swing.JLabel();
+        jLabelUserName = new javax.swing.JLabel();
+        jLabel2 = new javax.swing.JLabel();
+        jLabel3 = new javax.swing.JLabel();
+        jLabel4 = new javax.swing.JLabel();
+        jLabel5 = new javax.swing.JLabel();
+        jLabel6 = new javax.swing.JLabel();
+        jLabel7 = new javax.swing.JLabel();
+        jTextFieldID = new javax.swing.JTextField();
+        jTextFieldStartDate = new javax.swing.JTextField();
+        jTextFieldEndDate = new javax.swing.JTextField();
+        jTextFieldDescription = new javax.swing.JTextField();
+        jTextFieldIDMechanik = new javax.swing.JTextField();
+        jTextFieldIDSamochod = new javax.swing.JTextField();
+        jScrollPane1 = new javax.swing.JScrollPane();
+        jTableDisplayOrders = new javax.swing.JTable();
+        jButton2 = new javax.swing.JButton();
+        jButton3 = new javax.swing.JButton();
+        jButton4 = new javax.swing.JButton();
+        jButton5 = new javax.swing.JButton();
+        jLabel8 = new javax.swing.JLabel();
+        jTextFieldCost = new javax.swing.JTextField();
+        jButton6 = new javax.swing.JButton();
+        jButton7 = new javax.swing.JButton();
+
+        setDefaultCloseOperation(javax.swing.WindowConstants.EXIT_ON_CLOSE);
+
+        jLabel1.setText("Zalogowany jako:");
+
+        jLabelUserName.setText("jLabel2");
+
+        jLabel2.setFont(new java.awt.Font("Tahoma", 0, 12)); // NOI18N
+        jLabel2.setText("ID:");
+
+        jLabel3.setFont(new java.awt.Font("Tahoma", 0, 12)); // NOI18N
+        jLabel3.setText("Data rozpoczęcia:");
+
+        jLabel4.setFont(new java.awt.Font("Tahoma", 0, 12)); // NOI18N
+        jLabel4.setText("Data zakończenia:");
+
+        jLabel5.setFont(new java.awt.Font("Tahoma", 0, 12)); // NOI18N
+        jLabel5.setText("Opis:");
+
+        jLabel6.setFont(new java.awt.Font("Tahoma", 0, 12)); // NOI18N
+        jLabel6.setText("ID Mechanika:");
+
+        jLabel7.setFont(new java.awt.Font("Tahoma", 0, 12)); // NOI18N
+        jLabel7.setText("ID Samochodu:");
+
+        jTextFieldID.setFont(new java.awt.Font("Tahoma", 0, 12)); // NOI18N
+
+        jTextFieldStartDate.setFont(new java.awt.Font("Tahoma", 0, 12)); // NOI18N
+
+        jTextFieldEndDate.setFont(new java.awt.Font("Tahoma", 0, 12)); // NOI18N
+
+        jTextFieldDescription.setFont(new java.awt.Font("Tahoma", 0, 12)); // NOI18N
+
+        jTextFieldIDMechanik.setFont(new java.awt.Font("Tahoma", 0, 12)); // NOI18N
+
+        jTextFieldIDSamochod.setFont(new java.awt.Font("Tahoma", 0, 12)); // NOI18N
+
+        jTableDisplayOrders.setModel(new javax.swing.table.DefaultTableModel(
+            new Object [][] {
+
+            },
+            new String [] {
+                "ID", "Data rozpoczęcia", "Data zakończenia", "Opis", "ID Mechanika", "ID Samochodu", "Koszt"
+            }
+        ) {
+            boolean[] canEdit = new boolean [] {
+                false, false, false, false, false, false, false
+            };
+
+            public boolean isCellEditable(int rowIndex, int columnIndex) {
+                return canEdit [columnIndex];
+            }
+        });
+        jTableDisplayOrders.addMouseListener(new java.awt.event.MouseAdapter() {
+            public void mouseClicked(java.awt.event.MouseEvent evt) {
+                jTableDisplayOrdersMouseClicked(evt);
+            }
+        });
+        jScrollPane1.setViewportView(jTableDisplayOrders);
+        if (jTableDisplayOrders.getColumnModel().getColumnCount() > 0) {
+            jTableDisplayOrders.getColumnModel().getColumn(0).setPreferredWidth(30);
+            jTableDisplayOrders.getColumnModel().getColumn(0).setMaxWidth(40);
+            jTableDisplayOrders.getColumnModel().getColumn(1).setPreferredWidth(120);
+            jTableDisplayOrders.getColumnModel().getColumn(1).setMaxWidth(160);
+            jTableDisplayOrders.getColumnModel().getColumn(2).setPreferredWidth(120);
+            jTableDisplayOrders.getColumnModel().getColumn(2).setMaxWidth(160);
+            jTableDisplayOrders.getColumnModel().getColumn(3).setPreferredWidth(160);
+            jTableDisplayOrders.getColumnModel().getColumn(4).setPreferredWidth(50);
+            jTableDisplayOrders.getColumnModel().getColumn(5).setPreferredWidth(55);
+            jTableDisplayOrders.getColumnModel().getColumn(6).setPreferredWidth(40);
+        }
+
+        jButton2.setFont(new java.awt.Font("Tahoma", 1, 10)); // NOI18N
+        jButton2.setIcon(new javax.swing.ImageIcon(getClass().getResource("/icons/order end.png"))); // NOI18N
+        jButton2.setText("Zakończ realizację zamówienia");
+        jButton2.setToolTipText("");
+        jButton2.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                jButton2ActionPerformed(evt);
+            }
+        });
+
+        jButton3.setFont(new java.awt.Font("Tahoma", 1, 10)); // NOI18N
+        jButton3.setIcon(new javax.swing.ImageIcon(getClass().getResource("/icons/return.png"))); // NOI18N
+        jButton3.setText("Wstecz");
+        jButton3.setToolTipText("");
+        jButton3.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                jButton3ActionPerformed(evt);
+            }
+        });
+
+        jButton4.setFont(new java.awt.Font("Tahoma", 1, 10)); // NOI18N
+        jButton4.setIcon(new javax.swing.ImageIcon(getClass().getResource("/icons/remove.png"))); // NOI18N
+        jButton4.setText("Usuń");
+        jButton4.setToolTipText("");
+
+        jButton5.setFont(new java.awt.Font("Tahoma", 1, 10)); // NOI18N
+        jButton5.setIcon(new javax.swing.ImageIcon(getClass().getResource("/icons/look.png"))); // NOI18N
+        jButton5.setText("Podgląd właścicieli");
+        jButton5.setToolTipText("");
+        jButton5.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                jButton5ActionPerformed(evt);
+            }
+        });
+
+        jLabel8.setFont(new java.awt.Font("Tahoma", 0, 12)); // NOI18N
+        jLabel8.setText("Koszt:");
+
+        jTextFieldCost.setFont(new java.awt.Font("Tahoma", 0, 12)); // NOI18N
+
+        jButton6.setFont(new java.awt.Font("Tahoma", 1, 10)); // NOI18N
+        jButton6.setIcon(new javax.swing.ImageIcon(getClass().getResource("/icons/look.png"))); // NOI18N
+        jButton6.setText("Wyszukaj");
+        jButton6.setToolTipText("");
+        jButton6.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                jButton6ActionPerformed(evt);
+            }
+        });
+
+        jButton7.setFont(new java.awt.Font("Tahoma", 1, 10)); // NOI18N
+        jButton7.setIcon(new javax.swing.ImageIcon(getClass().getResource("/icons/clear.png"))); // NOI18N
+        jButton7.setText("Wyczyść");
+        jButton7.setToolTipText("");
+        jButton7.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                jButton7ActionPerformed(evt);
+            }
+        });
+
+        javax.swing.GroupLayout jPanel1Layout = new javax.swing.GroupLayout(jPanel1);
+        jPanel1.setLayout(jPanel1Layout);
+        jPanel1Layout.setHorizontalGroup(
+            jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addGroup(jPanel1Layout.createSequentialGroup()
+                .addContainerGap()
+                .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                    .addGroup(jPanel1Layout.createSequentialGroup()
+                        .addComponent(jLabel1)
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                        .addComponent(jLabelUserName)
+                        .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
+                    .addGroup(jPanel1Layout.createSequentialGroup()
+                        .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
+                            .addGroup(jPanel1Layout.createSequentialGroup()
+                                .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                                    .addComponent(jLabel2)
+                                    .addComponent(jLabel3)
+                                    .addComponent(jLabel5)
+                                    .addComponent(jLabel7)
+                                    .addComponent(jLabel4)
+                                    .addComponent(jLabel6))
+                                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
+                                .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING, false)
+                                    .addComponent(jTextFieldIDMechanik)
+                                    .addComponent(jTextFieldDescription, javax.swing.GroupLayout.Alignment.LEADING)
+                                    .addComponent(jTextFieldEndDate, javax.swing.GroupLayout.Alignment.LEADING)
+                                    .addComponent(jTextFieldStartDate, javax.swing.GroupLayout.Alignment.LEADING)
+                                    .addComponent(jTextFieldID)
+                                    .addComponent(jTextFieldIDSamochod, javax.swing.GroupLayout.DEFAULT_SIZE, 190, Short.MAX_VALUE)))
+                            .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING)
+                                .addComponent(jButton5, javax.swing.GroupLayout.PREFERRED_SIZE, 244, javax.swing.GroupLayout.PREFERRED_SIZE)
+                                .addGroup(javax.swing.GroupLayout.Alignment.LEADING, jPanel1Layout.createSequentialGroup()
+                                    .addGap(17, 17, 17)
+                                    .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING)
+                                        .addComponent(jButton4, javax.swing.GroupLayout.PREFERRED_SIZE, 113, javax.swing.GroupLayout.PREFERRED_SIZE)
+                                        .addComponent(jButton6, javax.swing.GroupLayout.PREFERRED_SIZE, 113, javax.swing.GroupLayout.PREFERRED_SIZE))
+                                    .addGap(18, 18, 18)
+                                    .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                                        .addComponent(jButton3, javax.swing.GroupLayout.PREFERRED_SIZE, 113, javax.swing.GroupLayout.PREFERRED_SIZE)
+                                        .addComponent(jButton7, javax.swing.GroupLayout.PREFERRED_SIZE, 113, javax.swing.GroupLayout.PREFERRED_SIZE)))
+                                .addComponent(jButton2, javax.swing.GroupLayout.PREFERRED_SIZE, 244, javax.swing.GroupLayout.PREFERRED_SIZE))
+                            .addGroup(jPanel1Layout.createSequentialGroup()
+                                .addComponent(jLabel8)
+                                .addGap(74, 74, 74)
+                                .addComponent(jTextFieldCost)))
+                        .addGap(28, 28, 28)
+                        .addComponent(jScrollPane1, javax.swing.GroupLayout.DEFAULT_SIZE, 873, Short.MAX_VALUE))))
+        );
+        jPanel1Layout.setVerticalGroup(
+            jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addGroup(jPanel1Layout.createSequentialGroup()
+                .addContainerGap()
+                .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                    .addComponent(jLabel1)
+                    .addComponent(jLabelUserName))
+                .addGap(18, 18, 18)
+                .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                    .addGroup(jPanel1Layout.createSequentialGroup()
+                        .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                            .addComponent(jLabel2)
+                            .addComponent(jTextFieldID, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                        .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                            .addComponent(jLabel3)
+                            .addComponent(jTextFieldStartDate, javax.swing.GroupLayout.PREFERRED_SIZE, 21, javax.swing.GroupLayout.PREFERRED_SIZE))
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                        .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                            .addComponent(jTextFieldEndDate, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                            .addComponent(jLabel4))
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                        .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                            .addComponent(jTextFieldDescription, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                            .addComponent(jLabel5))
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                        .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                            .addComponent(jTextFieldIDMechanik, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                            .addComponent(jLabel6))
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                        .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                            .addComponent(jTextFieldIDSamochod, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                            .addComponent(jLabel7))
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                        .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING)
+                            .addComponent(jLabel8)
+                            .addComponent(jTextFieldCost, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
+                        .addGap(18, 18, 18)
+                        .addComponent(jButton2, javax.swing.GroupLayout.PREFERRED_SIZE, 38, javax.swing.GroupLayout.PREFERRED_SIZE)
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                        .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                            .addComponent(jButton6, javax.swing.GroupLayout.PREFERRED_SIZE, 38, javax.swing.GroupLayout.PREFERRED_SIZE)
+                            .addComponent(jButton7, javax.swing.GroupLayout.PREFERRED_SIZE, 38, javax.swing.GroupLayout.PREFERRED_SIZE))
+                        .addGap(18, 18, 18)
+                        .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                            .addComponent(jButton4, javax.swing.GroupLayout.PREFERRED_SIZE, 38, javax.swing.GroupLayout.PREFERRED_SIZE)
+                            .addComponent(jButton3, javax.swing.GroupLayout.PREFERRED_SIZE, 38, javax.swing.GroupLayout.PREFERRED_SIZE))
+                        .addGap(18, 18, 18)
+                        .addComponent(jButton5, javax.swing.GroupLayout.PREFERRED_SIZE, 38, javax.swing.GroupLayout.PREFERRED_SIZE)
+                        .addGap(0, 0, Short.MAX_VALUE))
+                    .addComponent(jScrollPane1))
+                .addContainerGap())
+        );
+
+        javax.swing.GroupLayout layout = new javax.swing.GroupLayout(getContentPane());
+        getContentPane().setLayout(layout);
+        layout.setHorizontalGroup(
+            layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addGroup(layout.createSequentialGroup()
+                .addComponent(jPanel1, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addGap(0, 0, Short.MAX_VALUE))
+        );
+        layout.setVerticalGroup(
+            layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, layout.createSequentialGroup()
+                .addComponent(jPanel1, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                .addContainerGap())
+        );
+
+        pack();
+    }// </editor-fold>//GEN-END:initComponents
+
+    private void jTableDisplayOrdersMouseClicked(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_jTableDisplayOrdersMouseClicked
+        // Wyswietlenie wybranego rekordu w JTextFields
+        int i = jTableDisplayOrders.getSelectedRow();
+        TableModel model = jTableDisplayOrders.getModel();
+        Object endDateValue = model.getValueAt(i, 2);
+        
+        jTextFieldID.setText(model.getValueAt(i, 0).toString());
+        jTextFieldStartDate.setText(model.getValueAt(i, 1).toString());
+        if(endDateValue != null){
+            jTextFieldEndDate.setText(model.getValueAt(i, 2).toString()); 
+        }
+        else{
+            jTextFieldEndDate.setText(""); 
+        }
+        jTextFieldDescription.setText(model.getValueAt(i, 3).toString());
+        jTextFieldIDMechanik.setText(model.getValueAt(i, 4).toString());
+        jTextFieldIDSamochod.setText(model.getValueAt(i, 5).toString()); 
+        jTextFieldCost.setText(model.getValueAt(i, 6).toString());
+        savedID = jTextFieldID.getText();
+        
+        
+    }//GEN-LAST:event_jTableDisplayOrdersMouseClicked
+
+    private void jButton2ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButton2ActionPerformed
+        String ID = jTextFieldID.getText();
+        ArrayList<Order> ordersList; //zmoenna na lista zeby pozniej sprawdzic date zkaonczenia i koszt w wybranym zamowieniu
+        Order biezaceZamowienie;
+        int biezaceID = (Integer.parseInt(jTextFieldID.getText()) - 1); //-1 bo w liscie od 0
+
+
+        if (savedID.equals(ID)) {
+            try {
+               ordersList = getOrdersList();
+               biezaceZamowienie = ordersList.get(biezaceID);
+                if(biezaceZamowienie.getEndDate() == null){
+                               String query = "UPDATE Zamowienie SET ZakonczenieRealizacji='"
+                            + jTextFieldEndDate.getText() + "', KosztRealizacji=" + jTextFieldCost.getText() 
+                            + " WHERE IDZamowienie=" + jTextFieldID.getText();
+
+                    try {
+                        executeSQLQuery(query, "zakończona");
+                    } catch (SQLException ex) {
+                        Logger.getLogger(MechanicOrdersManager.class.getName()).log(Level.SEVERE, null, ex);
+                    } 
+                }
+                else{
+                    JOptionPane.showMessageDialog(null, "Zamówienie zostało wcześniej już zakończone.");
+                }
+               
+           } catch (SQLException ex) {
+               Logger.getLogger(MechanicOrdersManager.class.getName()).log(Level.SEVERE, null, ex);
+           }
+            
+        }
+        else {
+            JOptionPane.showMessageDialog(null, "Nie można zmienić ID klienta."); //ZMIENIC WIADOMOSC TODO ?
+        }
+    }//GEN-LAST:event_jButton2ActionPerformed
+
+    private void jButton3ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButton3ActionPerformed
+        
+        if(userType == "M"){ 
+            MechanicStartPanel msp = new MechanicStartPanel(userName, userType);
+            msp.setVisible(true);
+            setVisible(false);
+        }
+        else if(userType == "A"){   //DO USUNIECIA BO TU TYLKO  MECHANIK
+            AdminStartPanel asp = new AdminStartPanel(userName, userType);
+            asp.setVisible(true);
+            setVisible(false);
+        }
+        else if(userType == "B"){   //DO USUNIECIA BO TU TYLKO  MECHANIK
+            BOKStartPanel bsp = new BOKStartPanel(userName, userType);
+            bsp.setVisible(true);
+            setVisible(false);
+        }
+    }//GEN-LAST:event_jButton3ActionPerformed
+
+    private void jButton5ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButton5ActionPerformed
+        //Wyświetlenie Klientów w nowym oknie 
+        JFrame frame = new JFrame("Klienci");
+         JTable clientsTab = new JTable();
+        
+         clientsTab.setModel(new javax.swing.table.DefaultTableModel(
+            new Object [][] {
+
+            },
+            new String [] {
+                "ID", "Imie", "Nazwisko", "Adres", "Telefon", "E-Mail"
+            }
+        ) {
+           
+        
+      //  boolean[] canEdit = new boolean [] {
+       //     for(int i = 0; i <= 6; i++) {
+      //          canEdit[i] = false;
+       // }
+        
+               // false, true, true, true, true, true
+           // };
+       // public boolean isCellEditable(int rowIndex, int columnIndex) {
+         //     return canEdit [columnIndex];
+        //}
+        });
+         
+         JScrollPane jsp = new JScrollPane(clientsTab);
+        //String userName2 = "";
+       // userName2 = this.userName;
+       // ClientsManager anc;
+        try {
+            ArrayList<Client> clientsList = new ArrayList<Client>();
+             Connection connection = getConnection();
+        
+            String query = "SELECT * FROM Klient";
+            Statement st;
+            ResultSet rs;
+        
+        try{
+            st = connection.createStatement();
+            rs = st.executeQuery(query);
+            Client client;
+            while(rs.next()){
+                client = new Client(rs.getInt("IDKlient"), rs.getString("Imie"), rs.getString("Nazwisko"), rs.getString("Adres"), rs.getString("Telefon"), rs.getString("Email"));
+                clientsList.add(client);
+            }
+        }catch(Exception e){
+               e.printStackTrace();
+        }
+        
+                
+        DefaultTableModel dtm = (DefaultTableModel)clientsTab.getModel();
+        dtm.setRowCount(0);        
+        Object[] row = new Object[6];       //6 kolumn
+        for(int i=0; i < clientsList.size(); i++){
+            row[0] = clientsList.get(i).getID();
+            row[1] = clientsList.get(i).getName();
+            row[2] = clientsList.get(i).getSurname();
+            row[3] = clientsList.get(i).getAddress();
+            row[4] = clientsList.get(i).getPhone();
+            row[5] = clientsList.get(i).getEmail();
+            dtm.addRow(row);
+        }
+        
+        jsp.setViewportView(clientsTab);
+        if (clientsTab.getColumnModel().getColumnCount() > 0) {
+            clientsTab.getColumnModel().getColumn(0).setMaxWidth(40);
+            clientsTab.getColumnModel().getColumn(1).setPreferredWidth(110);
+            clientsTab.getColumnModel().getColumn(1).setMaxWidth(160);
+            clientsTab.getColumnModel().getColumn(2).setPreferredWidth(110);
+            clientsTab.getColumnModel().getColumn(2).setMaxWidth(160);
+            clientsTab.getColumnModel().getColumn(3).setPreferredWidth(200);
+            clientsTab.getColumnModel().getColumn(4).setPreferredWidth(90);
+            clientsTab.getColumnModel().getColumn(5).setPreferredWidth(100);
+        }
+        
+        frame.add(jsp, BorderLayout.CENTER);
+        frame.pack();
+        frame.setVisible(true);
+        
+        } catch (SQLException ex) {
+            Logger.getLogger(BOKStartPanel.class.getName()).log(Level.SEVERE, null, ex);
+        }
+    }//GEN-LAST:event_jButton5ActionPerformed
+
+    private void jButton6ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButton6ActionPerformed
+        // TODO add your handling code here:
+    }//GEN-LAST:event_jButton6ActionPerformed
+
+    private void jButton7ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButton7ActionPerformed
+        jTextFieldID.setText("");
+        jTextFieldStartDate.setText("");
+        jTextFieldEndDate.setText("");
+        jTextFieldDescription.setText("");
+        jTextFieldIDMechanik.setText("");        
+        jTextFieldIDSamochod.setText("");
+        jTextFieldCost.setText("");
+    }//GEN-LAST:event_jButton7ActionPerformed
+
+    /**
+     * @param args the command line arguments
+     */
+    public static void main(String args[]) {
+        /* Set the Nimbus look and feel */
+        //<editor-fold defaultstate="collapsed" desc=" Look and feel setting code (optional) ">
+        /* If Nimbus (introduced in Java SE 6) is not available, stay with the default look and feel.
+         * For details see http://download.oracle.com/javase/tutorial/uiswing/lookandfeel/plaf.html 
+         */
+        try {
+            for (javax.swing.UIManager.LookAndFeelInfo info : javax.swing.UIManager.getInstalledLookAndFeels()) {
+                if ("Nimbus".equals(info.getName())) {
+                    javax.swing.UIManager.setLookAndFeel(info.getClassName());
+                    break;
+                }
+            }
+        } catch (ClassNotFoundException ex) {
+            java.util.logging.Logger.getLogger(MechanicOrdersManager.class.getName()).log(java.util.logging.Level.SEVERE, null, ex);
+        } catch (InstantiationException ex) {
+            java.util.logging.Logger.getLogger(MechanicOrdersManager.class.getName()).log(java.util.logging.Level.SEVERE, null, ex);
+        } catch (IllegalAccessException ex) {
+            java.util.logging.Logger.getLogger(MechanicOrdersManager.class.getName()).log(java.util.logging.Level.SEVERE, null, ex);
+        } catch (javax.swing.UnsupportedLookAndFeelException ex) {
+            java.util.logging.Logger.getLogger(MechanicOrdersManager.class.getName()).log(java.util.logging.Level.SEVERE, null, ex);
+        }
+        //</editor-fold>
+
+        /* Create and display the form */
+        java.awt.EventQueue.invokeLater(new Runnable() {
+            public void run() {
+                try {
+                    MechanicOrdersManager om = new MechanicOrdersManager();
+                    om.setLocationRelativeTo(null);
+                    om.setVisible(true);
+                } catch (SQLException ex) {
+                    Logger.getLogger(MechanicOrdersManager.class.getName()).log(Level.SEVERE, null, ex);
+                }
+            }
+        });
+    }
+
+    // Variables declaration - do not modify//GEN-BEGIN:variables
+    private javax.swing.JButton jButton2;
+    private javax.swing.JButton jButton3;
+    private javax.swing.JButton jButton4;
+    private javax.swing.JButton jButton5;
+    private javax.swing.JButton jButton6;
+    private javax.swing.JButton jButton7;
+    private javax.swing.JLabel jLabel1;
+    private javax.swing.JLabel jLabel2;
+    private javax.swing.JLabel jLabel3;
+    private javax.swing.JLabel jLabel4;
+    private javax.swing.JLabel jLabel5;
+    private javax.swing.JLabel jLabel6;
+    private javax.swing.JLabel jLabel7;
+    private javax.swing.JLabel jLabel8;
+    private javax.swing.JLabel jLabelUserName;
+    private javax.swing.JPanel jPanel1;
+    private javax.swing.JScrollPane jScrollPane1;
+    private javax.swing.JTable jTableDisplayOrders;
+    private javax.swing.JTextField jTextFieldCost;
+    private javax.swing.JTextField jTextFieldDescription;
+    private javax.swing.JTextField jTextFieldEndDate;
+    private javax.swing.JTextField jTextFieldID;
+    private javax.swing.JTextField jTextFieldIDMechanik;
+    private javax.swing.JTextField jTextFieldIDSamochod;
+    private javax.swing.JTextField jTextFieldStartDate;
+    // End of variables declaration//GEN-END:variables
+}
